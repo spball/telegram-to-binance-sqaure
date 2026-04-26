@@ -1,0 +1,20 @@
+[Unit]
+Description=Telegram MTProto to Binance Square Bridge
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=telegrambridge
+Group=telegrambridge
+WorkingDirectory=/opt/telegram-square-bridge
+EnvironmentFile=/opt/telegram-square-bridge/.env
+ExecStart=/opt/telegram-square-bridge/.venv/bin/python -m src.app
+Restart=on-failure
+RestartSec=5
+NoNewPrivileges=true
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target
