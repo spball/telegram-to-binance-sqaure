@@ -44,7 +44,7 @@ Fill values:
 - `TELEGRAM_API_ID`
 - `TELEGRAM_API_HASH`
 - `TELEGRAM_SESSION_PATH=/opt/telegram-square-bridge/data/telegram.session`
-- `TELEGRAM_CHANNEL=@your_channel`
+- `TELEGRAM_CHANNELS=@channel_a,@channel_b`
 - `BINANCE_SQUARE_API_KEY=...`
 
 ## 5. First run for Telethon session bootstrap
@@ -76,6 +76,6 @@ sudo systemctl restart telegram-square-bridge
 
 ## 8. Troubleshooting
 
-- If service starts but no messages are posted, verify channel identifier and Telegram account has access.
+- If service starts but no messages are posted, verify `TELEGRAM_CHANNELS` values and Telegram account access to all listed channels.
 - If code `220004` appears, rotate `BINANCE_SQUARE_API_KEY`.
 - If duplicate posts occur, verify SQLite path persistence under `/opt/telegram-square-bridge/data`.

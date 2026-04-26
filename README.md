@@ -1,15 +1,15 @@
 # Telegram MTProto -> Binance Square Bridge
 
-中文文档 Chinese docs:
+Chinese docs:
 
-- [README.zh-CN.md](README.zh-CN.md)
-- [deployment/DEPLOYMENT.zh-CN.md](deployment/DEPLOYMENT.zh-CN.md)
+- `README.zh-CN.md`
+- `deployment/DEPLOYMENT.zh-CN.md`
 
-This project listens to a Telegram public channel with a long-lived MTProto connection (Telethon) and posts every new text message to Binance Square.
+This project listens to one or more Telegram public channels with a long-lived MTProto connection (Telethon) and posts every new text message to Binance Square.
 
 ## Features
 
-- MTProto long-connection listener (single channel in v1)
+- MTProto long-connection listener (multi-channel)
 - SQLite idempotency (`chat_id + message_id` unique guard)
 - Binance Square text posting client
 - Retry with exponential backoff for retryable failures
@@ -42,7 +42,7 @@ On first run, Telethon may ask for login code/password in terminal to create ses
 - `TELEGRAM_API_ID`
 - `TELEGRAM_API_HASH`
 - `TELEGRAM_SESSION_PATH`
-- `TELEGRAM_CHANNEL` (e.g. `@example_channel`)
+- `TELEGRAM_CHANNELS` (comma-separated, e.g. `@channel_a,@channel_b`)
 - `BINANCE_SQUARE_API_KEY`
 
 ## Deployment summary

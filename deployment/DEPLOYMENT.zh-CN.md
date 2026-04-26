@@ -46,20 +46,20 @@ chmod 600 .env
 - `TELEGRAM_API_ID`
 - `TELEGRAM_API_HASH`
 - `TELEGRAM_SESSION_PATH=/opt/telegram-square-bridge/data/telegram.session`
-- `TELEGRAM_CHANNEL=@your_channel`
+- `TELEGRAM_CHANNELS=@channel_a,@channel_b`
 - `BINANCE_SQUARE_API_KEY=...`
 
 变量来源与填写提示：
 
 - `TELEGRAM_API_ID`、`TELEGRAM_API_HASH`：在 https://my.telegram.org 的 API development tools 创建应用后获取。
 - `TELEGRAM_SESSION_PATH`：本机路径，建议固定为 `/opt/telegram-square-bridge/data/telegram.session`。
-- `TELEGRAM_CHANNEL`：从频道链接提取，例如 `https://t.me/binance_announcements` 填 `@binance_announcements`。
+- `TELEGRAM_CHANNELS`：从频道链接提取并用逗号拼接，例如 `https://t.me/binance_announcements` 和 `https://t.me/coinmarketcap` 填 `@binance_announcements,@coinmarketcap`。
 - `BINANCE_SQUARE_API_KEY`：在 Binance Square OpenAPI 的密钥页面创建并复制。
 
 建议先用以下命令检查是否写入成功（不会显示完整密钥）：
 
 ```bash
-grep -E 'TELEGRAM_API_ID|TELEGRAM_API_HASH|TELEGRAM_SESSION_PATH|TELEGRAM_CHANNEL|BINANCE_SQUARE_API_KEY' .env | sed 's/BINANCE_SQUARE_API_KEY=.*/BINANCE_SQUARE_API_KEY=***masked***/'
+grep -E 'TELEGRAM_API_ID|TELEGRAM_API_HASH|TELEGRAM_SESSION_PATH|TELEGRAM_CHANNELS|BINANCE_SQUARE_API_KEY' .env | sed 's/BINANCE_SQUARE_API_KEY=.*/BINANCE_SQUARE_API_KEY=***masked***/'
 ```
 
 ## 5. 首次前台运行（生成 Telethon 会话）
@@ -91,7 +91,7 @@ sudo systemctl restart telegram-square-bridge
 
 ## 8. 故障排查
 
-- 服务正常启动但没有发帖：检查 `TELEGRAM_CHANNEL` 是否正确，且当前 Telegram 账号有该频道访问权限。
+- 服务正常启动但没有发帖：检查 `TELEGRAM_CHANNELS` 是否正确，且当前 Telegram 账号有这些频道访问权限。
 - 返回错误码 `220004`：说明 Square API Key 过期，需更新 `BINANCE_SQUARE_API_KEY`。
 - 出现重复发帖：确认 SQLite 数据库路径在持久化目录 `/opt/telegram-square-bridge/data` 下，并未被重建。
 - 提示 `sudo: .venv/bin/pip: command not found`：

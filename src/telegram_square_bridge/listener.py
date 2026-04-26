@@ -23,7 +23,7 @@ class TelegramSquareBridge:
         )
 
     def _register_handlers(self) -> None:
-        @self.client.on(events.NewMessage(chats=self.settings.telegram_channel))
+        @self.client.on(events.NewMessage(chats=self.settings.telegram_channels))
         async def on_new_message(event: events.NewMessage.Event) -> None:
             text = event.raw_text or ""
             msg = TelegramMessage(
@@ -39,8 +39,8 @@ class TelegramSquareBridge:
         await self.client.start()
         me = await self.client.get_me()
         LOGGER.info(
-            "Telegram connected as %s; listening channel=%s",
+            "Telegram connected as %s; listening channels=%s",
             getattr(me, "username", None) or getattr(me, "id", "unknown"),
-            self.settings.telegram_channel,
+            ",".join(self.settings.telegram_channels),
         )
         await self.client.run_until_disconnected()

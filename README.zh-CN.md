@@ -1,10 +1,10 @@
 # Telegram MTProto 到 Binance Square 桥接服务
 
-本项目使用 Telegram 的 MTProto 长连接（Telethon）监听公开频道的新消息，并将每条新文本消息发布到 Binance Square。
+本项目使用 Telegram 的 MTProto 长连接（Telethon）监听一个或多个公开频道的新消息，并将每条新文本消息发布到 Binance Square。
 
 ## 功能特性
 
-- MTProto 长连接监听（V1 为单频道）
+- MTProto 长连接监听（支持多频道）
 - SQLite 幂等去重（`chat_id + message_id` 唯一键）
 - Binance Square 文本发帖客户端
 - 对可重试错误执行指数退避重试
@@ -37,7 +37,7 @@ python -m src.app
 - `TELEGRAM_API_ID`
 - `TELEGRAM_API_HASH`
 - `TELEGRAM_SESSION_PATH`
-- `TELEGRAM_CHANNEL`（例如 `@example_channel`）
+- `TELEGRAM_CHANNELS`（逗号分隔，例如 `@channel_a,@channel_b`）
 - `BINANCE_SQUARE_API_KEY`
 
 ## 环境变量获取提示
@@ -59,12 +59,13 @@ python -m src.app
 - 推荐值：`/opt/telegram-square-bridge/data/telegram.session`
 - 说明：首次运行时 Telethon 会自动在该路径创建会话文件。
 
-### 3) TELEGRAM_CHANNEL
+### 3) TELEGRAM_CHANNELS
 
 - 获取位置：目标 Telegram 频道链接。
 - 填写规则：
-	- 公开频道：把链接 `https://t.me/频道名` 转为 `@频道名`。
-	- 例如链接是 `https://t.me/binance_announcements`，则填写 `@binance_announcements`。
+	- 每个公开频道都把链接 `https://t.me/频道名` 转为 `@频道名`。
+	- 多个频道用英文逗号分隔。
+	- 例如监听两个频道：`@binance_announcements,@coinmarketcap`
 - 注意：运行账号必须能访问该频道。
 
 ### 4) BINANCE_SQUARE_API_KEY
@@ -84,7 +85,7 @@ python -m src.app
 TELEGRAM_API_ID=12345678
 TELEGRAM_API_HASH=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 TELEGRAM_SESSION_PATH=/opt/telegram-square-bridge/data/telegram.session
-TELEGRAM_CHANNEL=@your_channel
+TELEGRAM_CHANNELS=@channel_a,@channel_b
 BINANCE_SQUARE_API_KEY=your_real_key
 ```
 
