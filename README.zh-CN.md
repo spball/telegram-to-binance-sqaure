@@ -7,6 +7,7 @@
 - MTProto 长连接监听（支持多频道）
 - SQLite 幂等去重（`chat_id + message_id` 唯一键）
 - Binance Square 文本发帖客户端
+- 按频道白名单映射不同发布模板
 - 对可重试错误执行指数退避重试
 - 提供 Linux 的 systemd 部署模板
 
@@ -38,6 +39,8 @@ python -m src.app
 - `TELEGRAM_API_HASH`
 - `TELEGRAM_SESSION_PATH`
 - `TELEGRAM_CHANNELS`（逗号分隔，例如 `@channel_a,@channel_b`）
+- `TELEGRAM_DEFAULT_TEMPLATE`（默认模板，例如 `{text}`）
+- `TELEGRAM_CHANNEL_TEMPLATE_MAP`（JSON 对象，把频道名映射到模板）
 - `BINANCE_SQUARE_API_KEY`
 
 ## 环境变量获取提示
@@ -67,6 +70,21 @@ python -m src.app
 	- 多个频道用英文逗号分隔。
 	- 例如监听两个频道：`@binance_announcements,@coinmarketcap`
 - 注意：运行账号必须能访问该频道。
+
+### 3.1) 按频道白名单映射不同发布模板
+
+- 获取位置：仍然写在 `.env` 中，不需要额外申请。
+- 作用：对指定频道使用不同的发布文案模板；未命中的频道走默认模板。
+- 推荐配置：
+
+```env
+TELEGRAM_DEFAULT_TEMPLATE={text}
+TELEGRAM_CHANNEL_TEMPLATE_MAP={"binance_announcements":"【交易所公告】\n{text}","coinmarketcap":"【市场快讯】\n{text}"}
+```
+
+- 模板里必须包含 `{text}`。
+- 可用占位符：`{text}`、`{channel}`、`{chat_id}`、`{message_id}`、`{date}`。
+- 频道白名单 key 建议写频道用户名，例如 `binance_announcements`，不要写 `@`。
 
 ### 4) BINANCE_SQUARE_API_KEY
 

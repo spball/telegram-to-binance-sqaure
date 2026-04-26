@@ -47,6 +47,8 @@ chmod 600 .env
 - `TELEGRAM_API_HASH`
 - `TELEGRAM_SESSION_PATH=/opt/telegram-square-bridge/data/telegram.session`
 - `TELEGRAM_CHANNELS=@channel_a,@channel_b`
+- `TELEGRAM_DEFAULT_TEMPLATE={text}`
+- `TELEGRAM_CHANNEL_TEMPLATE_MAP={"channel_a":"【A】\n{text}","channel_b":"【B】\n{text}"}`
 - `BINANCE_SQUARE_API_KEY=...`
 
 变量来源与填写提示：
@@ -54,12 +56,20 @@ chmod 600 .env
 - `TELEGRAM_API_ID`、`TELEGRAM_API_HASH`：在 https://my.telegram.org 的 API development tools 创建应用后获取。
 - `TELEGRAM_SESSION_PATH`：本机路径，建议固定为 `/opt/telegram-square-bridge/data/telegram.session`。
 - `TELEGRAM_CHANNELS`：从频道链接提取并用逗号拼接，例如 `https://t.me/binance_announcements` 和 `https://t.me/coinmarketcap` 填 `@binance_announcements,@coinmarketcap`。
+- `TELEGRAM_DEFAULT_TEMPLATE`：默认发布模板，建议先保留 `{text}`。
+- `TELEGRAM_CHANNEL_TEMPLATE_MAP`：JSON 对象，把频道用户名映射到不同模板，例如 `{"binance_announcements":"【公告】\n{text}"}`。
+
+模板说明：
+
+- 必须包含 `{text}`，否则无法把原始消息内容发出去。
+- 可使用的占位符包括：`{text}`、`{channel}`、`{chat_id}`、`{message_id}`、`{date}`。
+- 白名单 key 建议使用频道用户名，不要带 `@`。
 - `BINANCE_SQUARE_API_KEY`：在 Binance Square OpenAPI 的密钥页面创建并复制。
 
 建议先用以下命令检查是否写入成功（不会显示完整密钥）：
 
 ```bash
-grep -E 'TELEGRAM_API_ID|TELEGRAM_API_HASH|TELEGRAM_SESSION_PATH|TELEGRAM_CHANNELS|BINANCE_SQUARE_API_KEY' .env | sed 's/BINANCE_SQUARE_API_KEY=.*/BINANCE_SQUARE_API_KEY=***masked***/'
+grep -E 'TELEGRAM_API_ID|TELEGRAM_API_HASH|TELEGRAM_SESSION_PATH|TELEGRAM_CHANNELS|TELEGRAM_DEFAULT_TEMPLATE|TELEGRAM_CHANNEL_TEMPLATE_MAP|BINANCE_SQUARE_API_KEY' .env | sed 's/BINANCE_SQUARE_API_KEY=.*/BINANCE_SQUARE_API_KEY=***masked***/'
 ```
 
 ## 5. 首次前台运行（生成 Telethon 会话）

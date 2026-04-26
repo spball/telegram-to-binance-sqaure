@@ -26,7 +26,10 @@ class TelegramSquareBridge:
         @self.client.on(events.NewMessage(chats=self.settings.telegram_channels))
         async def on_new_message(event: events.NewMessage.Event) -> None:
             text = event.raw_text or ""
+            chat = await event.get_chat()
+            channel = f"@{getattr(chat, 'username', '')}" if getattr(chat, 'username', None) else str(event.chat_id)
             msg = TelegramMessage(
+                channel=channel,
                 chat_id=event.chat_id,
                 message_id=event.id,
                 date=event.date or datetime.utcnow(),

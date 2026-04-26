@@ -23,7 +23,7 @@ class MessagePipeline:
         self.square_client = square_client
 
     async def process(self, message: TelegramMessage) -> None:
-        correlation_id = f"{message.chat_id}:{message.message_id}"
+        correlation_id = f"{message.channel}:{message.chat_id}:{message.message_id}"
 
         if not message.text.strip():
             LOGGER.info("[%s] Skip empty text message", correlation_id)
@@ -33,7 +33,12 @@ class MessagePipeline:
             LOGGER.info("[%s] Skip duplicate message", correlation_id)
             return
 
-        post_text = message.text.strip()
+        post_text = self.settings.render_post_text(message)
+        if not post_text:
+            LOGGER.info("[%s] Skip empty rendered text", correlation_id)
+            return
+
+        LOGGER.info("[%s] Using template for channel=%s", correlation_id, message.channel)
         for attempt in range(1, self.settings.max_retry_attempts + 1):
             result = await self.square_client.post_text(post_text)
             if result.success:

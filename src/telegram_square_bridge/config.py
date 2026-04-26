@@ -1,10 +1,15 @@
 from __future__ import annotations
 
 from pathlib import Path
+from string import Formatter
 from typing import List
 
 from pydantic import Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+from .models import TelegramMessage
+
+ALLOWED_TEMPLATE_FIELDS = {"text", "channel", "chat_id", "message_id", "date"}
 
 
 class Settings(BaseSettings):
@@ -15,6 +20,8 @@ class Settings(BaseSettings):
     telegram_session_path: Path = Field(alias="TELEGRAM_SESSION_PATH")
     telegram_channels_raw: str = Field(default="", alias="TELEGRAM_CHANNELS")
     telegram_channel_legacy: str = Field(default="", alias="TELEGRAM_CHANNEL")
+    telegram_default_template: str = Field(default="{text}", alias="TELEGRAM_DEFAULT_TEMPLATE")
+    telegram_channel_template_map: dict[str, str] = Field(default_factory=dict, alias="TELEGRAM_CHANNEL_TEMPLATE_MAP")
 
     binance_square_api_key: str = Field(alias="BINANCE_SQUARE_API_KEY")
     binance_client_type: str = Field(default="binanceSkill", alias="BINANCE_CLIENT_TYPE")
@@ -44,6 +51,19 @@ class Settings(BaseSettings):
         value.parent.mkdir(parents=True, exist_ok=True)
         return value
 
+    @field_validator("telegram_default_template")
+    @classmethod
+    def validate_default_template(cls, value: str) -> str:
+        return cls.validate_template(value)
+
+    @field_validator("telegram_channel_template_map")
+    @classmethod
+    def validate_channel_template_map(cls, value: dict[str, str]) -> dict[str, str]:
+        normalized: dict[str, str] = {}
+        for channel, template in value.items():
+            normalized[cls.normalize_channel_key(channel)] = cls.validate_template(template)
+        return normalized
+
     @property
     def masked_square_key(self) -> str:
         key = self.binance_square_api_key
@@ -58,3 +78,41 @@ class Settings(BaseSettings):
         if not channels:
             raise ValueError("TELEGRAM_CHANNELS cannot be empty. Use comma-separated channels, e.g. @a,@b")
         return channels
+
+    @staticmethod
+    def normalize_channel_key(channel: str) -> str:
+        clean_value = channel.strip()
+        if clean_value.startswith("https://t.me/"):
+            clean_value = clean_value.removeprefix("https://t.me/")
+        if clean_value.startswith("http://t.me/"):
+            clean_value = clean_value.removeprefix("http://t.me/")
+        if clean_value.startswith("@"):
+            clean_value = clean_value[1:]
+        return clean_value.lower()
+
+    @classmethod
+    def validate_template(cls, template: str) -> str:
+        clean_template = template.strip()
+        if not clean_template:
+            raise ValueError("Template cannot be empty.")
+        if "{text}" not in clean_template:
+            raise ValueError("Template must include {text}.")
+        for _, field_name, _, _ in Formatter().parse(clean_template):
+            if field_name and field_name not in ALLOWED_TEMPLATE_FIELDS:
+                raise ValueError(f"Unsupported template field: {field_name}")
+        return clean_template
+
+    def resolve_post_template(self, channel: str) -> str:
+        normalized_channel = self.normalize_channel_key(channel)
+        return self.telegram_channel_template_map.get(normalized_channel, self.telegram_default_template)
+
+    def render_post_text(self, message: TelegramMessage) -> str:
+        template = self.resolve_post_template(message.channel)
+        rendered = template.format(
+            text=message.text.strip(),
+            channel=message.channel,
+            chat_id=message.chat_id,
+            message_id=message.message_id,
+            date=message.date.isoformat(),
+        )
+        return rendered.strip()

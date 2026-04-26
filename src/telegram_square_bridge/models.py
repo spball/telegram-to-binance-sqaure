@@ -7,6 +7,7 @@ from typing import Optional
 
 @dataclass(frozen=True)
 class TelegramMessage:
+    channel: str
     chat_id: int
     message_id: int
     date: datetime
